@@ -1,0 +1,70 @@
+# Issue ops
+name: issue-ops
+
+# Use the 'issues' trigger with 'labeled' event
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  issue-ops:
+    # Run the job only for the specific label 'repo-request'
+    if: ${{ github.event.label.name == 'repo-request' }}
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+    output:
+      REPO_NAME: ${{ steps.repo-request.outputs.REPO_NAME }}
+    steps:
+      # Action from marketplace to parse the body of issues created as forms
+      - name: Issue Forms Body Parser
+        id: parse
+        uses: zentered/issue-forms-body-parser@v2.0.0
+
+      - name: Repository Request Validation
+        id: repo-request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          repo_name=$(echo '${{ steps.parse.outputs.data }}' | jq -r '.name.text')
+          repo_dept=$(echo '${{ steps.parse.outputs.data }}' | jq -r '.department.text')
+          repo_full_name="$repo_dept-$repo_name"
+
+          echo "REPO_NAME=$repo_full_name" >> "$GITHUB_OUTPUT"
+
+          mention="@${{ github.event.issue.user.login }}: "
+          message="Requested repository '$repo_full_name' will be sent for approval."
+          exitcode=0
+
+          # shall not be empty
+          if [ -z "$repo_full_name" ]; then
+              message="Repository name is empty.";
+              exitcode=1;
+          fi;                  
+
+          # shall be alphanumeric and minus only
+          if [[ "$repo_full_name" =~ [^\-a-zA-Z0-9] ]]; then 
+              message="Repository name shall be alphanumeric and minus only.";
+              exitcode=1;
+          fi;
+                          
+          # shall not start with minus
+          if [[ "$repo_full_name" == -* ]]; then
+              message="Repository name shall not start with minus.";
+              exitcode=1;
+          fi;
+
+          # shall not end with minus
+          if [[ "$repo_full_name" == *- ]]; then
+              message="Repository name shall not end with minus.";
+              exitcode=1;
+          fi;
+
+          if [ $exitcode -ne 0 ]; then
+              gh issue edit "${{ github.event.issue.number }}" --remove-label repo-request --repo "${{ github.event.repository.full_name }}"
+              message="$message Please fix the issue and try again by applying the label 'repo-request' again to the issue.";
+          fi;
+
+          gh issue comment "${{ github.event.issue.number }}" -b "$mention $message" --repo "${{ github.event.repository.full_name }}"
+          exit $exitcode
