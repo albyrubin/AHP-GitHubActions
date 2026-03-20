@@ -14,7 +14,7 @@ jobs:
     permissions:
       issues: write
       contents: read
-    output:
+    outputs:
       REPO_NAME: ${{ steps.repo-request.outputs.REPO_NAME }}
     steps:
       # Action from marketplace to parse the body of issues created as forms
