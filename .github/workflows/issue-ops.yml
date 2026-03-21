@@ -80,15 +80,27 @@ jobs:
       REPO_NAME: ${{ needs.issue-ops.outputs.REPO_NAME }}
       USER: ${{ github.event.issue.user.login }}
       ISSUE_NUMBER: ${{ github.event.issue.number }}
+
     steps:
-      # Authenticate using the app
-      - name: Create app token
-        uses: actions/create-github-app-token@v1.6.2
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Refresh user access token (OAuth)
         id: get-workflow-token
-        with:
-          app-id: ${{ vars.APP_ID }}
-          private-key: ${{ secrets.PRIVATE_KEY }}
-          owner: ${{ vars.ORGANIZATION }}
+        run: |
+          set -euo pipefail
+          RESP=$(curl -sS -X POST "https://github.com/login/oauth/access_token" \
+            -H "Accept: application/json" \
+            -d "client_id=${{ vars.CLIENT_ID }}" \
+            -d "client_secret=${{ secrets.CLIENT_SECRET }}" \
+            -d "grant_type=refresh_token" \
+            -d "refresh_token=${{ secrets.REFRESH_TOKEN }}")
+          echo "$RESP" | jq .
+          ACCESS=$(echo "$RESP" | jq -r .access_token)
+          if [ -z "$ACCESS" ] || [ "$ACCESS" = "null" ]; then
+            echo "Token refresh failed"; exit 1
+          fi
+          echo "token=$ACCESS" >> "$GITHUB_OUTPUT"
 
       # Create the repository and set the URL as an output parameter
       - name: Create repository
@@ -97,6 +109,7 @@ jobs:
           GH_TOKEN: ${{ steps.get-workflow-token.outputs.token }}
         run: |
           REPO_URL=$(gh repo create $REPO_OWNER/$REPO_NAME --private --clone)
+
           echo "repo_url=$REPO_URL" >> "$GITHUB_OUTPUT"
           echo "Repository '$REPO_NAME' has been successfully created: $REPO_URL"
 
