@@ -74,7 +74,7 @@ jobs:
     environment: repo-creation
     permissions:
       issues: write
-      contents: read
+      contents: write
       repository-projects: write
     env:
       REPO_OWNER: ${{ vars.ORGANIZATION }}
