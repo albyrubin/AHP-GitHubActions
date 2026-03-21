@@ -89,6 +89,8 @@ jobs:
           app-id: ${{ vars.APP_ID }}
           private-key: ${{ secrets.PRIVATE_KEY }}
           owner: ${{ vars.ORGANIZATION }}
+          repositories: |
+            AHP-GitHubActions
 
       # Create the repository and set the URL as an output parameter
       - name: Create repository
