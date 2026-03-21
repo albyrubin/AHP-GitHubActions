@@ -68,3 +68,23 @@ jobs:
 
           gh issue comment "${{ github.event.issue.number }}" -b "$mention $message" --repo "${{ github.event.repository.full_name }}"
           exit $exitcode
+  create-repo:
+    needs: issue-ops
+    runs-on: ubuntu-latest
+    environment: repo-creation
+    permissions:
+      issues: write
+      contents: read
+    env:
+      REPO_OWNER: ${{ vars.ORGANIZATION }}
+      REPO_NAME: ${{ needs.issue-ops.outputs.REPO_NAME }}
+      USER: ${{ github.event.issue.user.login }}
+      ISSUE_NUMBER: ${{ github.event.issue.number }}
+    steps:
+      - name: Create app token
+        uses: actions/create-github-app-token@v1.6.2
+        id: get-workflow-token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+          owner: ${{ vars.ORGANIZATION }}
