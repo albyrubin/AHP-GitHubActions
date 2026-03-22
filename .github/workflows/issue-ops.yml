@@ -110,7 +110,7 @@ jobs:
         run: |
           CURRENT_PATH=$(pwd)
           echo "Current Path before repo creation: $CURRENT_PATH"
-          REPO_URL=$(gh repo create $REPO_OWNER/$REPO_NAME --private)
+          REPO_URL=$(gh repo create $REPO_OWNER/$REPO_NAME --private --clone)
 
           echo "repo_url=$REPO_URL" >> "$GITHUB_OUTPUT"
           echo "Repository '$REPO_NAME' has been successfully created: $REPO_URL"
