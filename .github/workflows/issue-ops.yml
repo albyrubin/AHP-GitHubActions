@@ -123,6 +123,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPO_URL: ${{ steps.create-repo.outputs.repo_url }}
         run: |
+          cd ..
           CURRENT_PATH=$(pwd)
           echo "Current Path after repo creation: $CURRENT_PATH"
           echo "ls after repo creation: $(ls -lt)"
@@ -136,6 +137,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          CURRENT_PATH=$(pwd)
+          echo "Current Path after repo creation: $CURRENT_PATH"
+          echo "ls after repo creation: $(ls -lt)"
           gh issue comment "$ISSUE_NUMBER" \
             -b "@$USER: Repository '$REPO_OWNER/$REPO_NAME' creation failed. Please contact the administrator." \
             --repo ${{ github.event.repository.full_name }}
