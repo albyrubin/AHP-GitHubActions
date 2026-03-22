@@ -108,6 +108,8 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.get-workflow-token.outputs.token }}
         run: |
+          CURRENT_PATH=$(pwd)
+          echo "Current Path before repo creation: $CURRENT_PATH"
           REPO_URL=$(gh repo create $REPO_OWNER/$REPO_NAME --private)
 
           echo "repo_url=$REPO_URL" >> "$GITHUB_OUTPUT"
@@ -121,7 +123,7 @@ jobs:
           REPO_URL: ${{ steps.create-repo.outputs.repo_url }}
         run: |
           CURRENT_PATH=$(pwd)
-          echo "Current Path: $CURRENT_PATH"
+          echo "Current Path after repo creation: $CURRENT_PATH"
           gh issue comment "$ISSUE_NUMBER" \
             -b "@$USER: Repository '$REPO_OWNER/$REPO_NAME' has been created successfully: '$REPO_URL'"
           gh issue edit "$ISSUE_NUMBER" --remove-label repo-request --repo ${{ github.event.repository.full_name }}
