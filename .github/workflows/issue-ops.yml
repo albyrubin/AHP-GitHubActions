@@ -110,6 +110,7 @@ jobs:
         run: |
           CURRENT_PATH=$(pwd)
           echo "Current Path before repo creation: $CURRENT_PATH"
+          echo "ls before repo creation: $(ls -lt)"
           REPO_URL=$(gh repo create $REPO_OWNER/$REPO_NAME --private --clone)
 
           echo "repo_url=$REPO_URL" >> "$GITHUB_OUTPUT"
@@ -124,6 +125,7 @@ jobs:
         run: |
           CURRENT_PATH=$(pwd)
           echo "Current Path after repo creation: $CURRENT_PATH"
+          echo "ls after repo creation: $(ls -lt)"
           gh issue comment "$ISSUE_NUMBER" \
             -b "@$USER: Repository '$REPO_OWNER/$REPO_NAME' has been created successfully: '$REPO_URL'"
           gh issue edit "$ISSUE_NUMBER" --remove-label repo-request --repo ${{ github.event.repository.full_name }}
