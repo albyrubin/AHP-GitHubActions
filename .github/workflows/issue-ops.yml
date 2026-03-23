@@ -111,6 +111,9 @@ jobs:
 
       - name: Refresh user access token (OAuth)
         id: get-workflow-token
+        env:
+          CODE: ${{ secrets.CODE }}
+        if: ${{ env.CODE == '' }}
         run: |
           set -euo pipefail
 
