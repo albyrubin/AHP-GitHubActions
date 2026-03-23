@@ -101,9 +101,6 @@ jobs:
           ACCESS=$(echo "$RESP" | jq -r .access_token)
           REFRESH=$(echo "$RESP" | jq -r .refresh_token)
 
-          echo "::add-mask::$ACCESS"
-          echo "::add-mask::$REFRESH"
-
           if [ -z "${ACCESS}" ] || [ "${ACCESS}" = "null" ]; then
             echo "First-time code exchange failed."; exit 1
           fi
@@ -129,7 +126,6 @@ jobs:
             -d "refresh_token=${{ secrets.REFRESH_TOKEN }}")
 
           ACCESS=$(echo "$RESP" | jq -r .access_token)
-          echo "::add-mask::$ACCESS"
 
           if [ -z "$ACCESS" ] || [ "$ACCESS" = "null" ]; then
             echo "Token refresh failed"; exit 1
@@ -137,7 +133,6 @@ jobs:
           echo "token=$ACCESS" >> "$GITHUB_OUTPUT"
 
           NEW_REFRESH=$(echo "$RESP" | jq -r .refresh_token)
-          echo "::add-mask::$NEW_REFRESH"
 
           if [ -n "${NEW_REFRESH}" ] && [ "${NEW_REFRESH}" != "null" ]; then
             echo "refresh_token=${NEW_REFRESH}" >> "$GITHUB_OUTPUT"
@@ -150,7 +145,6 @@ jobs:
         run: |
           set -euo pipefail
           NEW_RT="${{ steps.exchange.outputs.refresh_token || steps.get-workflow-token.outputs.refresh_token }}"
-          echo "::add-mask::$NEW_RT"
           printf "%s" "$NEW_RT" | gh secret set REFRESH_TOKEN --repo "$GITHUB_REPOSITORY" --app actions
 
       # Create the repository and set the URL as an output parameter
