@@ -104,7 +104,7 @@ jobs:
           if [ -z "${ACCESS}" ] || [ "${ACCESS}" = "null" ]; then
             echo "First-time code exchange failed."; exit 1
           fi
-          echo "access_token=${ACCESS}" >> "$GITHUB_OUTPUT"
+          echo "token=${ACCESS}" >> "$GITHUB_OUTPUT"
           if [ -n "${REFRESH}" ] && [ "${REFRESH}" != "null" ]; then
             echo "refresh_token=${REFRESH}" >> "$GITHUB_OUTPUT"
           fi
@@ -143,8 +143,6 @@ jobs:
 
       - name: Update REFRESH_TOKEN secret (if a new one is present)
         if: ${{ steps.exchange.outputs.refresh_token != '' || steps.get-workflow-token.outputs.refresh_token != '' }}
-        env:
-          GH_TOKEN: ${{ steps.get-workflow-token.outputs.token }}
         run: |
           set -euo pipefail
           NEW_RT="${{ steps.exchange.outputs.refresh_token || steps.get-workflow-token.outputs.refresh_token }}"
