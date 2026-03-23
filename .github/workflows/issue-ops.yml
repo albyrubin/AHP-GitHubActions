@@ -144,7 +144,7 @@ jobs:
       - name: Update REFRESH_TOKEN secret (if a new one is present)
         if: ${{ steps.exchange.outputs.refresh_token != '' || steps.get-workflow-token.outputs.refresh_token != '' }}
         env:
-          GH_TOKEN: ${{ github.token }} # use the workflow's installation token to update secrets
+          GH_TOKEN: ${{ steps.get-workflow-token.outputs.token }}
         run: |
           set -euo pipefail
           NEW_RT="${{ steps.exchange.outputs.refresh_token || steps.get-workflow-token.outputs.refresh_token }}"
