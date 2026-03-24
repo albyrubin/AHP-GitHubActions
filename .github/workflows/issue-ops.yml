@@ -153,8 +153,9 @@ jobs:
       # Create the repository and set the URL as an output parameter
       - name: Create repository
         id: create-repo
+        if: ${{ steps.exchange.outputs.refresh_token != '' || steps.get-workflow-token.outputs.refresh_token != '' }}
         env:
-          GH_TOKEN: ${{ steps.get-workflow-token.outputs.token }}
+          GH_TOKEN: ${{ steps.exchange.outputs.token || steps.get-workflow-token.outputs.token }}
         run: |
           REPO_URL=$(gh repo create $REPO_OWNER/$REPO_NAME --private --clone)
 
